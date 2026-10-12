@@ -3,6 +3,22 @@ import asyncLoading from 'react-async-loader';
 import { useGoogleMaps, useOnlineStatusMonitoring, useUserSettings } from 'incyclist-services';
 import { EventLogger } from 'gd-eventlog';
 
+const GOOGLE_MAPS_HOST = 'https://maps.googleapis.com'
+
+// the installation uuid is only meant for our own maps proxy - never send it to Google
+export const buildMapsUrl = (baseUrl, apiKey, uuid) => {
+    if (!baseUrl)
+        return undefined
+
+    const params = []
+    if (apiKey!==undefined)
+        params.push(`key=${apiKey}`)
+    if (uuid && !baseUrl.startsWith(GOOGLE_MAPS_HOST))
+        params.push(`uuid=${uuid}`)
+
+    return params.length ? `${baseUrl}?${params.join('&')}` : baseUrl
+}
+
 
 export const MapsApiLoader = ()=> {
 
@@ -20,19 +36,7 @@ export const MapsApiLoader = ()=> {
     const mapScriptsToProps = () => {
 
         const uuid = settings.getValue('uuid',undefined)
-        let googleUrl = service.getMapsDownloadUrl()
-        if ( state.googleMapsApiKey!==undefined) {
-            googleUrl = googleUrl + '?key=' + state.googleMapsApiKey;
-            if (uuid) {
-                googleUrl = googleUrl+`&uuid=${uuid}`
-            }
-        }
-        else {
-            if (uuid) {
-                googleUrl = googleUrl+`?uuid=${uuid}`
-            }
-
-        }
+        const googleUrl = buildMapsUrl(service.getMapsDownloadUrl(), state.googleMapsApiKey, uuid)
         
           let googleMaps = {
                 globalPath: 'google.maps',
@@ -132,6 +136,15 @@ export const MapsApiLoader = ()=> {
     
     if (!state.initialized || state.loaded || !state.online)
         return false
+
+    // neither a maps server nor a personal API key is configured
+    if (!service.getMapsDownloadUrl()) {
+        if (!refStart.current) {
+            logger.logEvent({message:'Google Maps API not loaded', reason:'no maps server or API key configured'})
+            refStart.current = Date.now()
+        }
+        return false
+    }
 
     if (!refStart.current) {
         const url = service.getMapsDownloadUrl()
