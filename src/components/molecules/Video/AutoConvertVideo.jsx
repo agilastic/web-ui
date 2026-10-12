@@ -107,6 +107,12 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
     }
 
 
+    // keep the element's muted state in sync with the prop, so sound can be switched on/off during a ride
+    useEffect( ()=>{
+        if (refVideo.current && refVideo.current.muted!==muted)
+            refVideo.current.muted = muted
+    },[muted])
+
     const setRate = useCallback( ( rate )=> {       
         if (!refVideo.current)
             return
@@ -119,6 +125,8 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
     
 
         try {
+            // playback speed follows the rider's speed - keep the audio at its natural pitch
+            refVideo.current.preservesPitch = true
             refVideo.current.playbackRate = rate        
             if (rate>0)
                 startPlay()
