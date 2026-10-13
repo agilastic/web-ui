@@ -53,6 +53,7 @@ const DEFAULT_DONATE_URL = 'https://www.paypal.com/paypalme/incyclist'
 
 export const ActivitySummaryView = ( {activity,position,preview, units, xScale,
                                   showMap,showSave,showNew=true,showContinue=true,showExit=true,showDelete:showDeleteProp,
+                                  showGarminUpload=false, onGarminUpload,
                                   isSaving=false,showDeleteConfirm=false,
                                   showDonate,donateText=DEFAULT_DONATE_TEXT,donateUrl=DEFAULT_DONATE_URL,onDonateClicked,
                                   onTitleChange, onSave, onNew, onContinue, onExit, onDelete, onDeleteConfirm, onDeleteCancel
@@ -153,6 +154,7 @@ export const ActivitySummaryView = ( {activity,position,preview, units, xScale,
                 <ButtonBar justify='center'>
                     {showSave && <Button height={'5vh'} primary={true} text={isSaving ? '' : 'Save'} disabled={isSaving} onClick={onSave}>{isSaving && <Loader size='2.2vh'/>}</Button>}
                     {!showSave && showNew && <Button height={'5vh'} primary={true} text='New Ride' disabled={isSaving} onClick={onNew} />}
+                    {!showSave && showGarminUpload && <Button height={'5vh'} primary={false} text='Upload to Garmin Connect' onClick={onGarminUpload} />}
                     {showSave && showContinue && <Button height={'5vh'} primary={false} text='Continue' onClick={onContinue} />}
                     {showSave &&showDelete && <Button height={'5vh'} primary={false} text='Delete' onClick={onDelete} />}
                     {!showSave &&showExit && <Button height={'5vh'} primary={false} text='Exit App' onClick={onExit} />}

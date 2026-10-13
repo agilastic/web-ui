@@ -69,6 +69,10 @@ export const DynamicActivitySummary = ({onExit,onNew,onContinue})=> {
             propsRef.current.onDeleteConfirm = onDeleteConfirm
             propsRef.current.onDeleteCancel = onDeleteCancel
             propsRef.current.onTitleChange = onChangeTitle
+            // saves the GPX to Downloads, opens the Garmin Connect import page and shows the file
+            propsRef.current.onGarminUpload = () => {
+                service.uploadToGarminConnect?.()
+            }
 
             if (propsRef.current.showDonate) {
                 propsRef.current.onDonateClicked = () => {
