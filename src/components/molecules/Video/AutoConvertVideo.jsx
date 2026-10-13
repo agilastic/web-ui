@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef,useState } from 'react';
-import { isAudibleRate } from './audio';
 import styled from 'styled-components';
 import { Observer } from 'incyclist-services';
 import { EventLogger } from 'gd-eventlog';
@@ -119,10 +118,9 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
     }
 
 
-    // audio is muted if requested (prop) or if the playback rate is outside of the audible range
-    const refAudibleRate = useRef(true)
+    // muted is decided by services (sound setting, playback rate) - the element just follows the prop
     const applyMuted = useCallback( ()=>{
-        const shouldMute = muted || !refAudioSupported.current || !refAudibleRate.current
+        const shouldMute = muted || !refAudioSupported.current
         if (refVideo.current && refVideo.current.muted!==shouldMute)
             refVideo.current.muted = shouldMute
     },[muted])
@@ -147,8 +145,6 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
             // playback speed follows the rider's speed - keep the audio at its natural pitch
             refVideo.current.preservesPitch = true
             refVideo.current.playbackRate = rate        
-            refAudibleRate.current = isAudibleRate(rate, refAudibleRate.current)
-            applyMuted()
             if (rate>0)
                 startPlay()
             else if (rate===0) 
@@ -159,7 +155,7 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
             logEvent({message:'failed to set rate', reason:err.message})
         }
 
-    },[startPlay, applyMuted])
+    },[startPlay])
 
 
     const setTime = useCallback( (time) => {
