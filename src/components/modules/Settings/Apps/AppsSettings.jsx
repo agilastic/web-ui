@@ -7,6 +7,7 @@ import { AppsItem } from "../../../molecules/Apps/AppsItem";
 import { StravaSettings } from "./Strava";
 import { KomootSettings } from "./Komoot/KomootSettings";
 import {IntervalsSettings} from './Intervals/IntervalsSettings'
+import { GarminConnectExport } from './GarminConnect'
 
 
 export const ContentArea = styled.div`
@@ -76,7 +77,10 @@ export const AppsSettings = ( ) => {
     if (state.selected && getMapping(state.selected))
         return <SettingsPage service={state.selected} onBack={onBack}/>
     
-    return <AppsSettingsView apps={state.apps} onClick={onClick}/>
+    return <>
+        <AppsSettingsView apps={state.apps} onClick={onClick}/>
+        <GarminConnectExport />
+    </>
     
 
 

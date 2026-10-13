@@ -82,6 +82,11 @@ export class AppInfoBinding extends EventEmitter{
         return this.getAppInfo()?.tempDir
     }
 
+    // user's download folder - provided by desktop versions with capability 'appSettings.appInfo.downloadsDir'
+    getDownloadsDir() {
+        return this.getAppInfo()?.downloadsDir
+    }
+
     isApp() {
         return this.getBinding() && this.getBinding().isApp()
     }
