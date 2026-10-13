@@ -13,7 +13,7 @@ const validCoordinates = points => (points || []).filter(point =>
 const profilePoints = points => (points || []).filter(point => finite(point.routeDistance) && finite(point.elevation))
 export const formatRecordedAt = recordedAt => {
     const ts = Date.parse(recordedAt ?? '')
-    return Number.isNaN(ts) ? undefined : new Date(ts).toLocaleDateString()
+    return Number.isNaN(ts) ? undefined : new Date(ts).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: '2-digit' })
 }
 
 const countryLabel = country => {
@@ -26,11 +26,23 @@ const videoPillLabels = { 'in-icloud': 'In iCloud', downloading: 'Downloading…
 
 const Surface = styled.article`
     position: relative; display: flex; flex-direction: column; box-sizing: border-box;
-    width: 100%; height: 100%; overflow: hidden; border-radius: 12px;
-    background: ${p => p.theme?.pageLists?.background}; border: 1px solid #3a3248;
+    width: 100%; height: 100%; overflow: hidden; border-radius: 14px;
+    background: ${p => p.theme?.pageLists?.background}; border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 4px 14px rgba(0,0,0,.28);
     color: ${p => p.theme?.dialog?.text ?? '#f7f5fa'}; text-align: left;
     font-family: inherit; cursor: pointer; isolation: isolate;
-    &:hover, &:focus-within { border-color: ${p => p.theme?.button?.primary?.background}; }
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    &:hover, &:focus-within {
+        border-color: ${p => p.theme?.button?.primary?.background};
+        transform: translateY(-3px);
+        box-shadow: 0 10px 26px rgba(0,0,0,.42);
+    }
+    &:hover img.route-preview-image { transform: scale(1.05); }
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+        &:hover, &:focus-within { transform: none; }
+        &:hover img.route-preview-image { transform: none; }
+    }
     &:focus-visible { outline: 3px solid ${p => p.theme?.button?.hover?.background}; outline-offset: -3px; }
     button { font-family: inherit; cursor: pointer; }
     button:focus-visible { outline: 3px solid ${p => p.theme?.button?.hover?.background}; outline-offset: 2px; }
@@ -44,9 +56,15 @@ const Surface = styled.article`
     `}
 `
 const Preview = styled.div`
-    position: relative; width: 100%; height: 132px; flex-shrink: 0;
+    position: relative; width: 100%; height: 196px; flex-shrink: 0;
     overflow: hidden; background: #252330;
-    > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    > img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+    ${p => !p.$list && css`
+        &::after {
+            content: ''; position: absolute; inset: 0; z-index: 1000; pointer-events: none;
+            background: linear-gradient(to bottom, rgba(10,12,18,.4) 0%, rgba(10,12,18,0) 28%, rgba(10,12,18,.15) 42%, rgba(10,12,18,.94) 100%);
+        }
+    `}
     ${p => p.$list && css`
         width: 148px;
         height: 100%;
@@ -63,10 +81,19 @@ const Placeholder = styled.div`
     background: radial-gradient(ellipse at 30% 20%, #3a3147, #242030 75%);
 `
 const MediaBadge = styled.span`
-    position: absolute; z-index: 1001; top: 12px; left: 12px;
-    display: inline-flex; align-items: center; gap: 5px; padding: 6px 9px;
-    background: rgba(19,16,27,.88); border: 1px solid #75697f; border-radius: 6px;
+    position: absolute; z-index: 1001; top: 10px; left: 10px;
+    display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px;
+    background: rgba(12,14,20,.62); border: 1px solid rgba(255,255,255,.22); border-radius: 999px;
+    backdrop-filter: blur(4px);
     font-size: 11px; font-weight: 700; letter-spacing: .6px;
+`
+// tiles: title and location on top of the preview image
+const TitleOverlay = styled.div`
+    position: absolute; z-index: 1001; left: 12px; right: 12px; bottom: 10px;
+    display: flex; flex-direction: column; gap: 4px;
+    color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.55);
+    h3 { min-height: 0; }
+    div { color: rgba(255,255,255,.82); }
 `
 const IconButton = styled.button`
     display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -128,8 +155,8 @@ const RouteKind = styled.span`
     &::before { content: '·'; margin: 0 5px 0 2px; }
 `
 const Stats = styled.div`
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-    strong { display: block; font-size: 20px; font-weight: 650; letter-spacing: -.5px; }
+    display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px;
+    strong { display: block; font-size: 18px; font-weight: 650; letter-spacing: -.5px; white-space: nowrap; }
     small { display: block; margin-top: 3px; font-size: 11px; color: #bfb6ce; }
     ${p => p.$list && css`
         gap: 7px;
@@ -150,8 +177,8 @@ const Profile = styled.div`
     `}
 `
 const StatusRow = styled.div`
-    position: absolute; z-index: 1001; bottom: 8px; left: 8px; right: 8px;
-    display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+    position: absolute; z-index: 1001; top: 10px; left: 90px; right: 10px;
+    display: flex; align-items: center; justify-content: flex-end; gap: 5px; flex-wrap: wrap;
     font-size: 11px; color: #beb5cc;
     ${p => p.$list && css`
         position: static;
@@ -164,7 +191,7 @@ const StatusRow = styled.div`
 `
 const Badge = styled.span`
     display: inline-flex; align-items: center; gap: 4px; padding: 4px 7px; border-radius: 5px;
-    margin-left: ${p => p.$live && !p.$list ? 'auto' : 0};
+    margin-left: 0;
     color: ${p => p.$live ? '#b2f1cf' : '#f7e0af'};
     background: ${p => p.$live ? 'rgba(18,55,42,.94)' : 'rgba(42,32,32,.94)'}; font-weight: 600;
 `
@@ -260,6 +287,7 @@ export const RouteTileSummaryView = (props) => {
         {sourceLabel ? <Badge>{sourceLabel}</Badge> : null}
         {cntActive > 0 ? <Badge $live $list={list}><PeopleIcon size={12} />{cntActive} live</Badge> : null}
     </>
+    const locationLabel = <Location>{location ? <><Flag code={location.code} height='13' alt='' />{location.name}</> : 'Location unavailable'}{list && typeof props.isLoop === 'boolean' ? <RouteKind>{props.isLoop ? 'Loop' : 'Point to point'}</RouteKind> : null}</Location>
     if (visible === false) return <div style={{ width: props.width, height: props.height }}><CardSkeleton /></div>
 
     const onTileClick = e => {
@@ -285,20 +313,24 @@ export const RouteTileSummaryView = (props) => {
             onClick={onTileClick}
             onKeyDown={onTileKeyDown}>
             <Preview $list={list}>
-                {renderImage ? <img src={previewUrl} alt={title} onError={() => setImageFailed(true)} draggable={false} /> :
+                {renderImage ? <img className='route-preview-image' src={previewUrl} alt={title} onError={() => setImageFailed(true)} draggable={false} /> :
                     renderMap ? <MapPreview><FreeMap noAttribution scrollWheelZoom={false} zoomControl={false} points={coordinates} startPos={0} draggable={false} /></MapPreview> :
                         <Placeholder>{details.loading ? <Loader size={26} /> : <><img src='images/route.svg' alt='' width='28' height='28' /><span>{isVideo ? 'Video Route' : 'Map unavailable'}</span></>}</Placeholder>}
                 <MediaBadge>{isVideo ? <><PlayIcon size={12} /> VIDEO</> : 'GPX'}</MediaBadge>
                 {!list ? <StatusRow>{statuses}</StatusRow> : null}
+                {!list ? <TitleOverlay>
+                    <Heading title={title}>{title}</Heading>
+                    {locationLabel}
+                </TitleOverlay> : null}
             </Preview>
             <Body $list={list}>
-                <ListIdentity>
+                {list ? <ListIdentity>
                     <Heading $list={list} title={title}>{title}</Heading>
                     <ListMeta>
-                        <Location>{location ? <><Flag code={location.code} height='13' alt='' />{location.name}</> : 'Location unavailable'}{list && typeof props.isLoop === 'boolean' ? <RouteKind>{props.isLoop ? 'Loop' : 'Point to point'}</RouteKind> : null}</Location>
-                        {list ? <StatusRow $list>{statuses}</StatusRow> : null}
+                        {locationLabel}
+                        <StatusRow $list>{statuses}</StatusRow>
                     </ListMeta>
-                </ListIdentity>
+                </ListIdentity> : null}
                 <Stats $list={list}>
                     <div><strong>{formatMetric(totalDistance, distance, 1000, 'km', 1)}</strong><small>Distance</small></div>
                     <div><strong>{formatMetric(totalElevation, elevation, 1, 'm', 0)}</strong><small>Total ascent</small></div>
