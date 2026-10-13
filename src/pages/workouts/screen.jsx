@@ -15,6 +15,7 @@ import {WorkoutCard} from '../../components/modules/workout/selection/WorkoutCar
 import { WorkoutCreateCard } from "../../components/modules/workout/selection/CreateCard"
 import { ScheduledWorkoutCard } from "../../components/modules/workout/selection/ScheduledWorkoutCard"
 import { WorkoutInboxBar } from "../../components/modules/workout/inbox"
+import { WorkoutGeneratorButton } from "../../components/modules/workout/generator"
 
 const UP = 'ArrowUp'
 const DOWN = 'ArrowDown'
@@ -42,6 +43,14 @@ const ContentArea = styled(Column)`
 const TitleRow = styled(Row)`
     align-items: center;
     width: 100%;
+`
+
+const TitleActions = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1.5vw;
+    margin-left: auto;
 `
 
 const CardView= styled(Row)`
@@ -328,7 +337,10 @@ export const WorkoutsScreen =  /*forwardRef(*/
                 <ContentArea width={'100%'} >
                     <TitleRow>
                         <PageTitle>Workouts</PageTitle>
-                        <WorkoutInboxBar />
+                        <TitleActions>
+                            <WorkoutGeneratorButton />
+                            <WorkoutInboxBar />
+                        </TitleActions>
                     </TitleRow>
 
                     <AppThemeProvider>                    

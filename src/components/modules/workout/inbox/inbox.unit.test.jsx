@@ -22,6 +22,7 @@ const createInbox = (props = {}) => {
     inbox.isEnabled = vi.fn(() => true)
     inbox.setEnabled = vi.fn()
     inbox.getLibraryUrl = vi.fn(() => 'https://whatsonzwift.com/workouts')
+    inbox.getStatus = vi.fn(() => 'active')
     return Object.assign(inbox, props)
 }
 
@@ -64,6 +65,28 @@ describe('Workout Inbox', () => {
 
             expect(mockInbox.current.setEnabled).toHaveBeenCalledWith(false)
             expect(checkbox).not.toBeChecked()
+        })
+
+        test('shows a hint when the Downloads folder can not be accessed', () => {
+            mockInbox.current.getStatus.mockReturnValue('no-access')
+            render(<WorkoutInboxBar />)
+            expect(screen.getByRole('alert')).toHaveTextContent('No access to the Downloads folder')
+        })
+
+        test('shows the hint as soon as the status changes', () => {
+            render(<WorkoutInboxBar />)
+            expect(screen.queryByRole('alert')).toBeNull()
+
+            act(() => { mockInbox.current.emit('status', 'no-access') })
+
+            expect(screen.getByRole('alert')).toBeInTheDocument()
+        })
+
+        test('no hint when the import is switched off', () => {
+            mockInbox.current.getStatus.mockReturnValue('no-access')
+            mockInbox.current.isEnabled.mockReturnValue(false)
+            render(<WorkoutInboxBar />)
+            expect(screen.queryByRole('alert')).toBeNull()
         })
     })
 
