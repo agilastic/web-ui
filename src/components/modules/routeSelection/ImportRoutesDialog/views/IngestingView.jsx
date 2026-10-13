@@ -37,7 +37,7 @@ export const IngestingView = ({ displayProps, cancel }) => {
                 <Text text={currentName} />
                 <Text text={`${current} of ${total}`} />
                 <ProgressBar completed={pct} height="1.5vh" width="60%" />
-                <Text text="You can keep using Incyclist — this runs in the background." />
+                <Text text="You can keep using ForkyCyclist — this runs in the background." />
             </Body>
             <ButtonBar justify="center">
                 <Button text="Stop" onClick={() => setConfirmStop(true)} />

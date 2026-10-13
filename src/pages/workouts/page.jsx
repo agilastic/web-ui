@@ -333,7 +333,7 @@ export const WorkoutsPage =  () => {
                             <li> Click OK to open the ZwoFactory page </li>
                             <li> Within ZwoFactory, create or select a pre-defined workout</li>
                             <li> Within ZwoFactory, download the workout using the Download button </li>
-                            <li> Go back to Incyclist and import the workout using the Import Card </li>
+                            <li> Go back to ForkyCyclist and import the workout using the Import Card </li>
                         </List>
                         </Column>
 

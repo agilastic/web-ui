@@ -131,7 +131,7 @@ export default class InterfaceSettings extends PureComponent {
 
                         { !enabled && name==='wifi' ?
                             <WarningMessage>
-                                <p><span role='img' aria-label='warning'>⚠️</span>When you enable this option, the Windows Firewall will request that you grant Incyclist the permissions to access the network</p>
+                                <p><span role='img' aria-label='warning'>⚠️</span>When you enable this option, the Windows Firewall will request that you grant ForkyCyclist the permissions to access the network</p>
                                 <p>This network access is required to scan for devices in the local network<br/>You can limit this access to local network only.</p>
                             </WarningMessage> 
                             : null}

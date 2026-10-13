@@ -83,7 +83,7 @@ export const RouteServersSettingsView = ({ servers = [], onAdd, onRemove, onTogg
         <AppThemeProvider>
             <ContentArea>
                 <Header>Video servers</Header>
-                <Hint>Routes and videos are loaded from all enabled servers. Changes apply after restarting Incyclist.</Hint>
+                <Hint>Routes and videos are loaded from all enabled servers. Changes apply after restarting ForkyCyclist.</Hint>
 
                 {servers.length === 0 ? <Hint>No server configured.</Hint> : null}
                 {servers.map(server => (

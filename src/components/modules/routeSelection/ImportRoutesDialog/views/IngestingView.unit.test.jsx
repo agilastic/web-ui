@@ -12,7 +12,7 @@ describe('IngestingView', () => {
         expect(screen.getByText('Adding routes to your library')).toBeInTheDocument()
         expect(screen.getByText('Stelvio')).toBeInTheDocument()
         expect(screen.getByText('3 of 10')).toBeInTheDocument()
-        expect(screen.getByText('You can keep using Incyclist — this runs in the background.')).toBeInTheDocument()
+        expect(screen.getByText('You can keep using ForkyCyclist — this runs in the background.')).toBeInTheDocument()
     })
 
     test('Stop asks for confirmation before cancelling, and backing out keeps the import running', () => {

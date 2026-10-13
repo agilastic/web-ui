@@ -89,7 +89,7 @@ export const App = ()=> {
     }
     if (terminating) {
         return <MainPage>
-            <MessageBox noYes noNo title='Incyclist' text='Disconnecting ...' center />
+            <MessageBox noYes noNo title='ForkyCyclist' text='Disconnecting ...' center />
         </MainPage>
     }
 
