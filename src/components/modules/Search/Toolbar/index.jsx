@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react"
 import styled from "styled-components"
-import { ChevronDownIcon, ChevronUpIcon, FilterIcon, XIcon } from "@primer/octicons-react"
+import { ChevronDownIcon, ChevronUpIcon, FilterIcon, SortAscIcon, SortDescIcon, XIcon } from "@primer/octicons-react"
 import { EventLogger } from "gd-eventlog"
 import { SearchBox } from "./SearchBox"
 import { DisplayTypeSelection } from "../../../molecules/Lists/DisplayTypeSelection"
@@ -129,7 +129,7 @@ const log = (message, props) => {
 /**
  * Toolbar of the Routes page:
  *
- * `[search box] [Filters (n)] (chip x) (chip x) Clear all   <count>   Sort: [...]  [list|tiles]`
+ * `[search box] [Filters (n)] (chip x) (chip x) Clear all   <count>   Sort: [...] [asc|desc]  [list|tiles]`
  *
  * The chips summarise the active filters and stay visible while the filter panel is collapsed.
  * Sort and the List/Tile display-type toggle are the last two items, grouped so they wrap
@@ -137,8 +137,8 @@ const log = (message, props) => {
  */
 export const RouteListToolbar = forwardRef( ({
         title, chips=[], filtersExpanded=false, countText,
-        sortOrder, sortOptions=[], displayType, onDisplayTypeSelected,
-        onTitleChange, onToggleFilters, onRemoveFilter, onClearFilters, onSortOrderChange,
+        sortOrder, sortDirection='asc', sortOptions=[], displayType, onDisplayTypeSelected,
+        onTitleChange, onToggleFilters, onRemoveFilter, onClearFilters, onSortOrderChange, onSortDirectionChange,
         onSearchFocus, onSearchBlur
     }, searchRef) => {
 
@@ -166,6 +166,17 @@ export const RouteListToolbar = forwardRef( ({
         if (typeof onSortOrderChange === 'function')
             onSortOrderChange(value)
     }
+
+    const onSortDirectionToggled = () => {
+        const value = sortDirection==='desc' ? 'asc' : 'desc'
+        log('button clicked', {button:'Sort direction', value})
+        if (typeof onSortDirectionChange === 'function')
+            onSortDirectionChange(value)
+    }
+
+    // 'suggested' is a ranking - it has no direction
+    const hasDirection = sortOrder!=='suggested'
+    const directionTitle = sortDirection==='desc' ? 'Descending' : 'Ascending'
 
     const cnt = chips.length
 
@@ -203,6 +214,12 @@ export const RouteListToolbar = forwardRef( ({
                     <Select className='sort-order' value={sortOrder} onChange={onSortChanged}>
                         {sortOptions.map( o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </Select>
+                    {hasDirection ?
+                        <ToolbarButton type='button' className='sort-direction' data-direction={sortDirection}
+                            title={directionTitle} aria-label={`Sort direction: ${directionTitle}`} onClick={onSortDirectionToggled}>
+                            {sortDirection==='desc' ? <SortDescIcon size={14}/> : <SortAscIcon size={14}/>}
+                        </ToolbarButton>
+                        : null}
                 </SortLabel>
 
                 <DisplayTypeSelection selected={displayType} onSelected={onDisplayTypeSelected} />

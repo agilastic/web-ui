@@ -15,6 +15,7 @@ export const FILTER_COLUMNS_MIN_WIDTH = 700
 export const HEADER_LAYOUT_GAP = 24
 
 export const SORT_OPTIONS = [
+    { value:'recordingDate', label:'Recording date' },
     { value:'suggested', label:'Suggested' },
     { value:'name',      label:'Name (A–Z)' },
     { value:'distance',  label:'Distance' },

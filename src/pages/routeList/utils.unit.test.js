@@ -141,9 +141,9 @@ describe('no match hint', () => {
     })
 })
 
-test('sort options, Suggested first', () => {
-    expect(SORT_OPTIONS.map(o=>o.label)).toEqual(['Suggested','Name (A–Z)','Distance','Elevation'])
-    expect(SORT_OPTIONS.map(o=>o.value)).toEqual(['suggested','name','distance','elevation'])
+test('sort options, Recording date first', () => {
+    expect(SORT_OPTIONS.map(o=>o.label)).toEqual(['Recording date','Suggested','Name (A–Z)','Distance','Elevation'])
+    expect(SORT_OPTIONS.map(o=>o.value)).toEqual(['recordingDate','suggested','name','distance','elevation'])
 })
 
 describe('drop overlay hint', () => {

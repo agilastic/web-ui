@@ -11,6 +11,11 @@ const finite = value => value !== null && value !== undefined && value !== '' &&
 const validCoordinates = points => (points || []).filter(point =>
     finite(point.lat) && finite(point.lng) && Math.abs(Number(point.lat)) <= 90 && Math.abs(Number(point.lng)) <= 180)
 const profilePoints = points => (points || []).filter(point => finite(point.routeDistance) && finite(point.elevation))
+export const formatRecordedAt = recordedAt => {
+    const ts = Date.parse(recordedAt ?? '')
+    return Number.isNaN(ts) ? undefined : new Date(ts).toLocaleDateString()
+}
+
 const countryLabel = country => {
     if (!country) return undefined
     const code = country.toUpperCase() === 'UK' ? 'GB' : country.toUpperCase()
@@ -231,6 +236,7 @@ export const RouteTileSummaryView = (props) => {
         previewUrl, visible, hasVideo, isDemo, isNew, cntActive, videoPill, sourceLabel,
         shape, details = {}, canDelete = false, buttonText = 'View details', onClick, onOK, onDelete, layout } = props
     const list = layout === 'list'
+    const recordedAtLabel = formatRecordedAt(props.recordedAt)
     const [imageFailed, setImageFailed] = useState(false)
     const hasShape = Array.isArray(shape) && shape.length > 0
     useEffect(() => { setImageFailed(false) }, [previewUrl, id])
@@ -296,6 +302,7 @@ export const RouteTileSummaryView = (props) => {
                 <Stats $list={list}>
                     <div><strong>{formatMetric(totalDistance, distance, 1000, 'km', 1)}</strong><small>Distance</small></div>
                     <div><strong>{formatMetric(totalElevation, elevation, 1, 'm', 0)}</strong><small>Total ascent</small></div>
+                    {recordedAtLabel ? <div className='recorded-at'><strong>{recordedAtLabel}</strong><small>Recorded</small></div> : null}
                 </Stats>
                 <RouteProfile points={points} list={list} />        
                 <Actions $list={list}>

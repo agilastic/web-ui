@@ -54,6 +54,7 @@ export const RouteListPage =  () => {
     // initial values are read from the service, so the first render already shows the persisted view
     const [displayType,setDisplayType] = useState( ()=>service.getDisplayType() )
     const [sortOrder,setSortOrder] = useState( ()=>service.getSortOrder() )
+    const [sortDirection,setSortDirection] = useState( ()=>service.getSortDirection() )
     const [filtersExpanded,setFiltersExpanded] = useState( ()=>service.getFiltersExpanded() )
     // whether ImportRoutesDialog is mounted - a plain conditional render (not DialogLauncher,
     // which is shaped for the onStart/onCancel ride-launch dialogs; this dialog's own API is a
@@ -224,8 +225,23 @@ export const RouteListPage =  () => {
 
         setSortOrder(order)
         service.setSortOrder(order)
+        // a new sort order starts with its own default direction
+        setSortDirection(service.getSortDirection())
 
-        // a new order starts at the top, in both views
+        restartList()
+    }
+
+    const onSortDirectionChanged = (direction) => {
+        if (!direction || direction===sortDirection)
+            return
+
+        setSortDirection(direction)
+        service.setSortDirection(direction)
+        restartList()
+    }
+
+    // a new order starts at the top, in both views
+    const restartList = () => {
         service.setListTop('list',0)
         service.setListTop('tiles',0)
         runSearch(getCurrentFilters())
@@ -289,7 +305,7 @@ export const RouteListPage =  () => {
         noMatchHint,
         activeImports,
         loading: loading || pageState==='closed' || !data,
-        displayType, sortOrder, filtersExpanded, listKey
+        displayType, sortOrder, sortDirection, filtersExpanded, listKey
     }
 
     return (
@@ -301,6 +317,7 @@ export const RouteListPage =  () => {
             onClearAllFilters={onClearAllFilters}
             onToggleFilters={onToggleFilters}
             onSortOrderChanged={onSortOrderChanged}
+            onSortDirectionChanged={onSortDirectionChanged}
             onDisplayTypeSelected={onDisplayTypeSelected}
             onSelect={onSelect}
             onDelete={onDelete}

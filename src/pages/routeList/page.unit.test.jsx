@@ -86,6 +86,8 @@ describe('RouteListPage', () => {
             getDisplayType: vi.fn(() => 'tiles'),
             setDisplayType: vi.fn(),
             getSortOrder: vi.fn(() => 'suggested'),
+            getSortDirection: vi.fn(() => 'asc'),
+            setSortDirection: vi.fn(),
             setSortOrder: vi.fn(),
             getFiltersExpanded: vi.fn(() => false),
             setFiltersExpanded: vi.fn(),

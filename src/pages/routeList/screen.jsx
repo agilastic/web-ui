@@ -251,9 +251,9 @@ const ImportRoutesButton = ({onClick}) => (
 export const RouteListScreen = ({
         routes, cards, filters={}, units, countries, contentTypes, routeTypes, routeSources,
         totalCount, countText, noMatchHint, activeImports=[],
-        loading, displayType='list', sortOrder='suggested', filtersExpanded=false, listKey,
+        loading, displayType='list', sortOrder='recordingDate', sortDirection='desc', filtersExpanded=false, listKey,
         onChangeFilter, onRemoveFilter, onClearPanelFilters, onClearAllFilters,
-        onToggleFilters, onSortOrderChanged, onDisplayTypeSelected,
+        onToggleFilters, onSortOrderChanged, onSortDirectionChanged, onDisplayTypeSelected,
         onSelect, onDelete, onRetryImport, onDeleteImport,
         onFreeRide, onImportRoutes, onImportFiles, closePage
     }) => {
@@ -437,6 +437,7 @@ export const RouteListScreen = ({
                         filtersExpanded={filtersExpanded}
                         countText={loading ? undefined : countText}
                         sortOrder={sortOrder}
+                        sortDirection={sortDirection}
                         sortOptions={SORT_OPTIONS}
                         displayType={displayType}
                         onDisplayTypeSelected={onDisplayTypeSelected}
@@ -445,6 +446,7 @@ export const RouteListScreen = ({
                         onRemoveFilter={onRemoveFilter}
                         onClearFilters={onClearPanelFilters}
                         onSortOrderChange={onSortOrderChanged}
+                        onSortDirectionChange={onSortDirectionChanged}
                     />
 
                     {filtersExpanded ?
