@@ -16,7 +16,7 @@ const Toggle = styled.button`
     border: none;
     border-radius: 1.1vh;
     cursor: pointer;
-    background: ${props => props.$on ? 'lightgreen' : '#767577'};
+    background: ${props => props.$on ? '#2ecc71' : 'rgba(255,255,255,.25)'};
     &::after {
         content: '';
         position: absolute;
@@ -25,7 +25,8 @@ const Toggle = styled.button`
         width: 1.7vh;
         height: 1.7vh;
         border-radius: 50%;
-        background: ${props => props.$on ? 'green' : '#f4f3f4'};
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,.35);
         transition: left 0.15s;
     }
 `
@@ -35,18 +36,19 @@ const Status = styled.div`
     position: absolute;
     box-sizing: border-box;
     padding-right: calc(3.9vh + 2vw);
-    background: black;
+    background: rgba(0,0,0,.28);
+    border-top: 1px solid rgba(255,255,255,.1);
     height: 20%;
-    min-heigt: 20%;
     display: flex;
     flex-direction: row;
-    font-size: 2vh;
+    font-size: 1.6vh;
+    letter-spacing: .06em;
     justify-content: center;
     align-items: center;
     text-align: center;
 
     width: 100%;
-    top: 80%;
+    bottom: 0;
     left:0;
     color: white;
 `

@@ -9,11 +9,20 @@ import { Button } from '../../components/atoms/Buttons/Button';
 const StatusLine = styled.div`
     display: flex;
     justify-content: center;
+    margin-top: 1vh;
+`
+
+const StatusPill = styled.div`
+    display: inline-flex;
     align-items: center;
-    font-size: 2vh;
+    padding: 0.8vh 1.2vw;
+    border-radius: 999px;
+    font-size: 1.9vh;
     color: white;
     text-align: center;
-    margin-top: 1vh;
+    background: rgba(12,14,20,.55);
+    border: 1px solid rgba(255,255,255,.16);
+    backdrop-filter: blur(8px);
 `
 
 const StatusDot = styled.span`
@@ -23,55 +32,44 @@ const StatusDot = styled.span`
     border-radius: 50%;
     margin-right: 0.8vw;
     background: ${props => props.$color};
+    box-shadow: 0 0 8px ${props => props.$color};
 `
 
 const statusDotColors = { red: '#e74c3c', green: '#2ecc71', amber: '#f5a623' }
 
-const RowLabel = styled.div`
-    position: absolute;
-    left: 0.5vw;
-    top: 0;
-    bottom: 0;
-    width: 10vw;
+// three tiles (20vw) with two gaps (3vw) - both rows share the same left edge
+const Content = styled.div`
+    width: 66vw;
+    margin: 0 auto;
+`
+
+const Section = styled.div`
+    margin-top: 3.5vh;
+`
+
+const RowHeader = styled.div`
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: right;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.8vw;
+    margin-bottom: 1.4vh;
     color: white;
-    pointer-events: none;
+    text-shadow: 0 1px 6px rgba(0,0,0,.55);
     >div:first-child {
-        font-size: 2.2vh;
-        font-weight: bold;
+        font-size: 1.9vh;
+        font-weight: 700;
+        letter-spacing: .12em;
     }
-    >div:last-child {
-        font-size: 1.8vh;
-    }
-`
-
-const BottomRow = styled.div`
-    min-height: 26vh;
-    position: relative;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    padding-top: 6vh;
-    padding-bottom: 4vh;
-    >* {
-        margin-right: 5vw;
+    >div:nth-child(2) {
+        font-size: 1.7vh;
+        color: rgba(255,255,255,.8);
     }
 `
 
-const TopRow = styled.div`
-    min-height: 26vh;
-    position: relative;
+const Tiles = styled.div`
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    padding-top: 7vh;
-    padding-bottom: 4vh;
-    >* {
-        margin-right: 4vw;
-    }
+    gap: 3vw;
 `
 
 const Buttons = styled.div`
@@ -137,24 +135,28 @@ export const PairingScreen = ( {capabilities,interfaces,connectRetry, readyToSta
             <PageTitle>Devices</PageTitle>
             {status ?
                 <StatusLine>
-                    <StatusDot $color={statusDotColors[status.dot]} />
-                    <span>{status.text}</span>
+                    <StatusPill>
+                        <StatusDot $color={statusDotColors[status.dot]} />
+                        <span>{status.text}</span>
+                    </StatusPill>
                 </StatusLine>
             : null}
-            <TopRow className='top'>
-                <RowLabel>
-                    <div>{rowLabels?.top?.text}</div>
-                    {rowLabels?.top?.subtext ? <div>{rowLabels.top.subtext}</div> : null}
-                </RowLabel>
-                {top.map(renderTile)}
-            </TopRow>
-            <BottomRow className='bottom'>
-                <RowLabel>
-                    <div>{rowLabels?.bottom?.text}</div>
-                    {rowLabels?.bottom?.subtext ? <div>{rowLabels.bottom.subtext}</div> : null}
-                </RowLabel>
-                {bottom.map(renderTile)}
-            </BottomRow>
+            <Content>
+                <Section className='top'>
+                    <RowHeader>
+                        <div>{rowLabels?.top?.text}</div>
+                        {rowLabels?.top?.subtext ? <div>{rowLabels.top.subtext}</div> : null}
+                    </RowHeader>
+                    <Tiles>{top.map(renderTile)}</Tiles>
+                </Section>
+                <Section className='bottom'>
+                    <RowHeader>
+                        <div>{rowLabels?.bottom?.text}</div>
+                        {rowLabels?.bottom?.subtext ? <div>{rowLabels.bottom.subtext}</div> : null}
+                    </RowHeader>
+                    <Tiles>{bottom.map(renderTile)}</Tiles>
+                </Section>
+            </Content>
             {buttons?.length ?
                 <Buttons>
                     {buttons.map( (b,idx)=> <Button key={idx} height={'6vh'} width={'8vw'} primary={b.primary} text={b.label} onClick={b.onClick} />)}
