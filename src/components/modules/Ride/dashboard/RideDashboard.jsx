@@ -6,12 +6,17 @@ import { Row } from '../../../atoms';
 
 const PanelArea = styled.div`
     display: content;
-    padding: 0;
+    box-sizing: border-box;
+    padding: 0.4vh 0.4vw;
     margin: 0;
     z-index: ${props => props.zIndex ?? 10};
-    background: ${props => props.scheme==='dark' ? 'none' : 'white'};
-    color: ${props => props.scheme==='dark' ? 'white' : 'black'};
-    border: none;
+    background: rgba(12,15,22,.72);
+    backdrop-filter: blur(10px) saturate(1.2);
+    border: 1px solid rgba(255,255,255,.12);
+    border-top: none;
+    border-radius: 0 0 14px 14px;
+    box-shadow: 0 8px 22px rgba(0,0,0,.35);
+    color: white;
     width: 100%;
     height: 100%;
 `;

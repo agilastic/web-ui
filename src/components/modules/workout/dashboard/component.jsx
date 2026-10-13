@@ -8,30 +8,45 @@ import { PanelItem,  Box, WorkoutGraph } from '../../../molecules';
 const PanelArea = styled.div`
     display: flex;
     flex-direction: column;
-    padding: 0;
+    box-sizing: border-box;
+    padding: 0 0.4vw 0.4vh 0.4vw;
     margin: 0;
     z-index: ${props => props.zIndex?? 10};
-    background: ${props => props.scheme==='dark' ? 'none' : 'white'};
-    background1:red;
-    color: ${props => props.scheme==='dark' ? 'white' : 'black'};
-    border: none;
+    background: rgba(12,15,22,.72);
+    backdrop-filter: blur(10px) saturate(1.2);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(0,0,0,.35);
+    overflow: hidden;
+    color: white;
     width: 100%;
     height: 100%;
 `;
 
 export const WorkoutInfo = styled.div`
-  background: rgb( 0,153,153);  
-  font-weight: bold;
+  font-weight: 650;
   font-size: 1.5vh;
-  width: calc(100% - 0.5vw);
+  letter-spacing: .02em;
+  width: 100%;
   color: white;
-  height: 2.5vh;
-  min-height: 2.5vh;
+  height: 2.6vh;
+  min-height: 2.6vh;
   align-items: center;
   text-align: left;
-  display: flex;  
-  padding: 0 0 0 0.5vw;
+  display: flex;
+  gap: 0.5vw;
   overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  &::before {
+    content: '';
+    flex: none;
+    width: 0.8vh;
+    height: 0.8vh;
+    border-radius: 50%;
+    background: #f0a03c;
+    box-shadow: 0 0 6px #f0a03c;
+  }
 `;
 
 export const WorkoutDetails = styled(Row)`
@@ -43,6 +58,11 @@ export const WorkoutDetails = styled(Row)`
   width: 100%;
   height: 76%;
 `;
+
+const GraphBox = styled(Box)`
+    padding: 0.4vh 0.3vw;
+    >div { border-radius: 6px; overflow: hidden; }
+`
 
 export const Icons = styled(Row)`
     position: absolute;
@@ -66,24 +86,24 @@ const TitleBar = styled(Column)`
     min-width:${props => props.hasFTP ? 'calc(100% - 6.5vw - 3ch)' : '100%'} ;
 `
 const FTPBar = styled(Row)`
-    background: rgb( 0,153,153);  
-    font-size: 1.5vh;   
-    width:calc(6.5vw + 3ch);     
+    align-items: center;
+    justify-content: flex-end;
+    width:calc(6.5vw + 3ch);
     min-width:calc(6.5vw + 3ch);
 `
 
 export const FTPInfo = styled.div`
-  background: rgb( 0,153,153);  
-  font-size: 1.5vh;
-  color: black;
+  font-size: 1.3vh;
+  color: rgba(255,255,255,.85);
+  display: flex;
   align-items: center;
-  text-align: left;
-  display: flex;  
-  height: 98%;
-  min-height: 98%;
-  width: 3ch;
-  min-width: 3ch;
-  margin: 0 0.1vw 0 0;
+  gap: 0.3vw;
+  padding: 0.2vh 0.6vw;
+  border-radius: 999px;
+  background: rgba(240,160,60,.18);
+  border: 1px solid rgba(240,160,60,.45);
+  white-space: nowrap;
+  >span { color: rgba(255,255,255,.6); letter-spacing: .1em; }
 `;
 
 export const FTPButton = styled(Column)`
@@ -131,6 +151,64 @@ export const StepPulseWrapper = styled.div`
   animation-duration: ${props => props.$pulseType === 'flash' ? '0.5s' : '0.3s'};
   animation-timing-function: ease-in-out;
 `
+
+const NextBox = styled.div`
+    width: ${props => props.width};
+    box-sizing: border-box;
+    border-left: 1px solid rgba(255,255,255,.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 1vw;
+    gap: 0.4vh;
+    color: white;
+`
+
+const NextLabel = styled.div`
+    font-size: 1.2vh;
+    font-weight: 700;
+    letter-spacing: .14em;
+    color: rgba(255,255,255,.6);
+`
+
+const NextName = styled.div`
+    font-size: 1.9vh;
+    font-weight: 650;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+`
+
+const NextTarget = styled.div`
+    font-size: 1.7vh;
+    color: rgba(255,255,255,.8);
+    font-variant-numeric: tabular-nums;
+`
+
+const range = (min,max,unit) => {
+    if (min===undefined && max===undefined)
+        return undefined
+    if (min===undefined || max===undefined || min===max)
+        return `${max??min}${unit}`
+    return `${min}-${max}${unit}`
+}
+
+export const NextStepInfo = ({next, width, formatTime}) => {
+    if (!next)
+        return <NextBox width={width} className='workout-next'><NextLabel>LAST STEP</NextLabel></NextBox>
+
+    const watts = range(next.minPower,next.maxPower,' W')
+    const pct = range(next.minPct,next.maxPct,'%')
+    const target = [formatTime(next.duration), watts, pct ? `(${pct})` : undefined].filter(Boolean).join(' · ')
+
+    return (
+        <NextBox width={width} className='workout-next'>
+            <NextLabel>NEXT</NextLabel>
+            <NextName>{next.name}</NextName>
+            <NextTarget>{target}</NextTarget>
+        </NextBox>
+    )
+}
 
 function pad (num,size) {
 	let s = String(num);
@@ -231,7 +309,7 @@ export default class WorkoutDashboard extends React.Component {
 
         try {
 
-            const {ftp,scheme,numDataColumns,start,stop,workout}=this.props;       
+            const {ftp,scheme,numDataColumns,start,stop,workout,next,showGraph=true}=this.props;       
 
             const workoutEnabled = (this.props.workout!==undefined && this.props.workout!==null)
             if (!workoutEnabled)
@@ -269,7 +347,7 @@ export default class WorkoutDashboard extends React.Component {
                             {hasFTP?
                             <FTPBar className='workout-settings'>
                                 <Column>
-                                    <FTPInfo><b>{'FTP:'+Number(ftp).toFixed(0)} </b></FTPInfo> 
+                                    <FTPInfo><span>FTP</span><b>{Number(ftp).toFixed(0)}W</b></FTPInfo> 
                                 </Column>
                                 
                             </FTPBar>
@@ -282,7 +360,10 @@ export default class WorkoutDashboard extends React.Component {
                                 <PanelItem {...panelProps} width="100%" rows={2} data={[{value:time.currentStep},{value:time.remaining}]} ></PanelItem>
                             </StepPulseWrapper>
                             
-                            <Box width={wBlank}><WorkoutGraph dashboard={true} scheme={scheme} ftp={ftp} start={start} stop={stop} position={[{x:woTime}]} workout={workout}/></Box> 
+                            {showGraph ?
+                                <GraphBox width={wBlank}><WorkoutGraph dashboard={true} scheme='dark' ftp={ftp} start={start} stop={stop} position={[{x:woTime}]} workout={workout}/></GraphBox> :
+                                <NextStepInfo next={next} width={wBlank} formatTime={(t)=>this.formatTime(t,true)} />
+                            } 
                             <PanelItem {...panelProps} data={{ value:woPI.power.value, unit:woPI.power.unit}} ></PanelItem>
                             <PanelItem {...panelProps} data={{value:woPI.hrm.value,unit:woPI.hrm.unit}} ></PanelItem>
                             <PanelItem {...panelProps} data={{value:woPI.cadence.value,unit:woPI.cadence.unit}}></PanelItem>

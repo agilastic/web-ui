@@ -1,27 +1,38 @@
 import React from 'react';
 import styled from 'styled-components';
 
+// modern dashboard cell: transparent, separated from its neighbour by a thin line - the dark
+// glass background comes from the dashboard container
 export const Box = styled.div`
     width:  ${props => props.width??'100%'};
-    border: rgb(229, 229, 229) 1px solid;
+    box-sizing: border-box;
+    border-left: 1px solid rgba(255,255,255,.1);
     position:relative;
-
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    &:first-child { border-left: none; }
 `;
 
 export const Title = styled.div`
-  background: rgb( 0,153,153);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   text-align: center;
-  font-family: "Roboto", "Arial", sans-serif, bold;
-  font-size: 2vh;
+  font-size: 1.25vh;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.62);
   width: 100%;
   height: 24%;
-  padding: 0;  
+  padding: 0;
 `;
 
 const getFontSize = (props) =>{
   if (props.primary)
-    return (props.len!==undefined && props.len>6 ? '1.8vw' : '2vw')
-  return '1.4vw'
+    return (props.len!==undefined && props.len>6 ? '1.8vw' : '2.1vw')
+  return '1.2vw'
 }
 
 const getValueSize = (props) => {
@@ -33,72 +44,53 @@ const getValueSize = (props) => {
 const Value = styled.div`
   position: relative;
   text-align: center;
-  font-family: "Roboto", "Arial", sans-serif, bold;
   font-size: ${props => getFontSize(props)} ;
+  font-weight: ${props => props.primary ? 650 : 500};
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em;
+  color: ${props => props.primary ? '#fff' : 'rgba(255,255,255,.72)'};
   width: 100%;
   height: ${props => getValueSize(props)};
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: baseline;
+  gap: .3vw;
   padding: 0px 0px;
-  border-bottom: ${props => props.rows>1 ? 'rgb(229, 229, 229) 1px solid' : 'none'};
-
+  >div:first-of-type { align-self: center; }
 `;
 
-const Unit = styled.div`
-  position: absolute;
-  top: 0;
-  right: 2px;
-  minHeight: 100%;
-
-  text-align: right;
-  font-family: "Roboto", "Arial", sans-serif, bold;
-  font-size: 1vh;
-  width: 20%;
-  height: 100%
-  padding: 0px 0px;
+const Unit = styled.span`
+  align-self: center;
+  font-size: 1.2vh;
+  font-weight: 500;
+  color: rgba(255,255,255,.6);
 `;
 
-const Info = styled.div`
-  position: absolute;
-  top: 0;
-  left: 2px;
-  minHeight: 100%;
-
-  text-align: left;
-  font-family: "Roboto", "Arial", sans-serif, bold;
-  font-size: 1vh;
-  width: 20%;
-  height: 100%
-  padding: 0px 0px;
+const Info = styled.span`
+  align-self: center;
+  font-size: 1.1vh;
+  color: rgba(255,255,255,.55);
 `;
 
-const Label = styled.div`
-  position: absolute;
-  top: 0;
-  left: 2px;
-  minHeight: 100%;
-
-  text-align: left;
-  font-family: "Roboto", "Arial", sans-serif, bold;
-  font-size: 1vh;
-  width: 20%;
-  height: 100%
-  padding: 0px 0px;
+const Label = styled.span`
+  align-self: center;
+  order: -1;
+  font-size: 1.1vh;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.5);
 `;
 
 
 const Led = styled.div`
   position: absolute;
-  top:2px;
-  right:2px;
-
-  height: 12%;
-  aspect-ratio: 1/1;
+  top: 0.6vh;
+  right: 0.4vw;
+  width: 0.9vh;
+  height: 0.9vh;
   background-color: ${props=>props.color||'none'};
   border-radius: 50%;
-  border-color: black;
-  border:  ${props=>props.color ? '2px solid' : 'none'};
+  box-shadow: 0 0 6px ${props=>props.color||'transparent'};
 `
 
 export const PanelItem = ({width,showHeader,title,noTitle=false,rows,dataState,data,children}) => {

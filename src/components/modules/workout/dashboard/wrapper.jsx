@@ -5,7 +5,7 @@ import { copyPropsExcluding } from '../../../../utils/props'
 import { playTone, STEP_COUNTDOWN_TICK_TONE, STEP_CHANGE_TONE } from '../../../../utils/stepChangeTone';
 
 
-export const DynamicWorkoutDashboard = ({visible, showSlope,zIndex, scheme='light'})=> {
+export const DynamicWorkoutDashboard = ({visible, showSlope,zIndex, scheme='light', showGraph=true})=> {
 
     const [state,setState] = useState(null)    
     const [initialized,setInitialized] = useState(false)
@@ -100,6 +100,7 @@ export const DynamicWorkoutDashboard = ({visible, showSlope,zIndex, scheme='ligh
             
             scheme = {scheme}
             zIndex = {zIndex}
+            showGraph = {showGraph}
         />
     )
     

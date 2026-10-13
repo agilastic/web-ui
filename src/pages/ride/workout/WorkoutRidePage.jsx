@@ -36,7 +36,7 @@ export const WorkoutRidePage = ( {workout, activity, state,initialized,onScreens
                         <RidePageItems visible={true} width='100%' height='100%' zIndex={1}  >
                             <WorkoutRideView isMain={true} workout={workout} activity={activity} />
                             <DynamicRideDashboard visible={showDashboard} scheme='light'fold='top-right' foldId='workout-ride-dashboard' opacity={1.0}  height={'10vh'} top={0} left={`${(100-dbWidth)/2}vw`} width={`${dbWidth}vw`}  />
-                            <DynamicWorkoutDashboard visible={!isStarting} showSlope={false} background='none' scheme='light' opacity={1.0}  height={'10vh'} top={'10vh'} left={`${(100-dbWidth)/2}vw`} width={`${dbWidth}vw`} />                            
+                            <DynamicWorkoutDashboard visible={!isStarting} showSlope={false} showGraph={false} background='none' scheme='light' opacity={1.0}  height={'10vh'} top={'10vh'} left={`${(100-dbWidth)/2}vw`} width={`${dbWidth}vw`} />                            
 
                             <WorkoutControl visible={!isStarting} background='none' top={'calc(20vh + 10px);'} left={`${(100-dbWidth)/2}vw`} onToggleMode={ onToggleCyclingMode}/>
                             <RouteOptions visible={!isStarting} top='1vh' left='1vw' height='15vh' width='15vw' 
