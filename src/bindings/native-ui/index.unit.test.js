@@ -141,3 +141,41 @@ describe('getDirectoryDisplayName()', () => {
         expect(getDirectoryDisplayName(undefined)).toBeUndefined()
     })
 })
+
+describe('NativeUiService safe area (camera notch)', () => {
+
+    let listener
+
+    beforeEach(() => {
+        vi.clearAllMocks()
+        hasFeatureMock.mockReturnValue(true)
+        apiMock.ui = {
+            getSafeArea: vi.fn().mockResolvedValue({ top: 37 }),
+            safeArea: { onMessage: vi.fn(cb => { listener = cb }) },
+        }
+        document.documentElement.style.removeProperty('--safe-area-top')
+    })
+
+    const safeAreaTop = () => document.documentElement.style.getPropertyValue('--safe-area-top')
+
+    test('keeps the reported area free at startup', async () => {
+        new NativeUiService()
+        await vi.waitFor(() => expect(safeAreaTop()).toBe('37px'))
+    })
+
+    test('follows changes, e.g. when leaving the fullscreen', async () => {
+        new NativeUiService()
+        await vi.waitFor(() => expect(safeAreaTop()).toBe('37px'))
+
+        listener({ top: 0 })
+
+        expect(safeAreaTop()).toBe('0px')
+    })
+
+    test('does nothing on platforms without safe area support', () => {
+        hasFeatureMock.mockReturnValue(false)
+        new NativeUiService()
+        expect(apiMock.ui.getSafeArea).not.toHaveBeenCalled()
+        expect(safeAreaTop()).toBe('')
+    })
+})

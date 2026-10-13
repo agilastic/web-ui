@@ -49,7 +49,8 @@ export const FollowRouteRidePage = ( { workout, activity, route, state,initializ
     const opacity = rideView==='map' ? 1 : 0.6
 
     const egPos = {
-        top:'88vh',
+        // ends at the bottom edge - the page itself starts below the free area at the top (camera notch)
+        top:'calc(88vh - var(--safe-area-top, 0px))',
         left:0,
         height:'12vh',
     }

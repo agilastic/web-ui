@@ -38,6 +38,29 @@ export default class NativeUiService   {
     navigate = null
     pendingNavigations = []
 
+    constructor() {
+        this.initSafeArea()
+    }
+
+    // keeps the top of the screen free where the platform needs it (camera notch of MacBooks in fullscreen):
+    // all pages are rendered inside #root, which starts at --safe-area-top
+    initSafeArea() {
+        try {
+            if (!hasFeature('ui.safeArea'))
+                return
+            const apply = (area) => this.setSafeAreaTop(area?.top ?? 0)
+            api.ui.safeArea.onMessage(apply)
+            api.ui.getSafeArea().then(apply).catch(() => {})
+        }
+        catch {
+            // not supported
+        }
+    }
+
+    setSafeAreaTop(top) {
+        document.documentElement.style.setProperty('--safe-area-top', `${Math.max(0, Number(top) || 0)}px`)
+    }
+
     registerNavigate(navigate) {
         this.navigate = navigate
         if (this.pendingNavigations.length) {
