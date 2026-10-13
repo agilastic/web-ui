@@ -95,8 +95,9 @@ const Btn = styled.button`
     background-image: ${props => props.img ? props.img : undefined};
     border: ${props => props.noBorder ? undefined: '1px solid transparent'};
     border-style: ${props => props.noBorder ? 'none': undefined};
-    border-color: #2c3e50;
-    border-radius: 4px;
+    border-color: transparent;
+    border-radius: 10px;
+    font-weight: 600;
     white-space: nowrap;
     padding: ${props => props.padding!==undefined ? props.padding : undefined};
     font-size: ${props => getFontSize(props)};
@@ -112,12 +113,13 @@ const Btn = styled.button`
 
     &:hover {
         background: ${props => (props.disabled ? getButtonColor(props) : props.theme?.button?.hover?.background ?? buttonTheme.hover.background)};
-        border-style: ${props => !props.no3D ? 'solid':undefined};
-        border-width: ${props => !props.no3D ? '3px':undefined};
-        border-color: ${props => !props.no3D ? 'white':undefined};
+        transform: ${props => props.disabled ? 'none' : 'translateY(-1px)'};
+        box-shadow: ${props => props.disabled ? 'none' : '0 6px 16px rgba(0,0,0,0.35)'};
 
-        box-shadow: ${props => !props.no3D ? '0px 15px 10px 0px rgba(0, 0, 0, 1)' : undefined}
-
+    }
+    &:focus-visible {
+        outline: 2px solid white;
+        outline-offset: 2px;
     }
 
     ${props => props.outline ? outlineStyle : ''}

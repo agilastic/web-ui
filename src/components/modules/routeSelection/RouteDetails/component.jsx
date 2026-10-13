@@ -12,9 +12,9 @@ import { EventLogger } from 'gd-eventlog'
 
 const ContentArea = styled(Column)`
     height: calc(100% - 7.7vh);
-    width: calc(100% - 0.8vw);
-    padding-left:0.4vw;
-    padding-right:0.4vw;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 1.2vh 1.2vw 0 1.2vw;
     ${scrollbar}
 `
 
@@ -33,7 +33,8 @@ const Preview = styled(Column)`
     padding-right: ${props => props?.position==='left'? '0.25vw' :undefined};
     padding-left: ${props => props?.position==='right'? '0.25vw' :undefined};
     margin-bottom: 1vh;
-
+    /* rounded map and video preview */
+    & > :first-child { border-radius: 12px; overflow: hidden; }
 `
 // height is fixed per route type (video vs GPX), never toggled by the smoothing level - nothing
 // in this container may change size or position as a consequence of the level a user picks

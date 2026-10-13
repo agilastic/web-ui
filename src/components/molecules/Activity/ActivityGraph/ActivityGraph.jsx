@@ -20,6 +20,41 @@ const ContainerArea = styled(Row)`
     height: 100%;
 `
 
+const Legend = styled(Row)`
+    gap: 1.5vw;
+    font-size: 1.5vh;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 0.6vh;
+`
+const LegendItem = styled.span`
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    &::before {
+        content: '';
+        width: 0.8em;
+        height: 0.8em;
+        border-radius: 50%;
+        background: ${props => props.$color};
+    }
+`
+const Tooltip = styled.div`
+    width: 20ch;
+    padding: 0.8vh 0.8vw;
+    border-radius: 10px;
+    background: rgba(12,15,23,0.92);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    color: white;
+    font-size: 1.5vh;
+    line-height: 1.5;
+    white-space: nowrap;
+`
+const POWER_COLOR = '#f0a030'
+const HEARTRATE_COLOR = '#ff5c74'
+const axisText = (color) => ({ text: { fill: color, stroke: 'none', fontSize: '1.4vh' } })
+const gridStyle = { stroke: 'rgba(255,255,255,0.08)' }
+
 const ActivityGraphView  = ({activity,ftp,width,height,units}) => {
 
     const [crosshairValues, setCrosshairValues] = useState([])
@@ -54,13 +89,13 @@ const ActivityGraphView  = ({activity,ftp,width,height,units}) => {
             }
 
             return (
-                <div style={{background: 'white',color:'black', fontSize:'1.5vh', width: '20ch'}}>
+                <Tooltip>
                 {getDistance()}<br/>
                 { speed!==undefined ? `Speed: ${speed.toFixed(1)} ${units?.speed??'km/h'}` :''}<br/> 
                 { power!==undefined ? `Power: ${power.toFixed(0)} W`:''} <br/>
                 { heartrate!==undefined ? `Heartrate: ${heartrate.toFixed(0)} bpm` : ''}  <br/> 
                 { elevation!==undefined ? `Elevation: ${elevation.toFixed(0)} ${units?.elevation??'m'}` :''}<br/> 
-                </div>
+                </Tooltip>
             );
         }
         return(<div></div>)        
@@ -90,14 +125,14 @@ const ActivityGraphView  = ({activity,ftp,width,height,units}) => {
     const getPowerConfig = () => {
         const ftpVal = activity?.user?.ftp??ftp
         if (!ftpVal) 
-            return { background:'blue', text:'white', line:'blue', style:'line'}        
+            return { background:POWER_COLOR, text:'white', line:POWER_COLOR, style:'line'}        
         else 
-            return { background:'blue', text:'white', line: 'blue', style:'bars'}        
+            return { background:POWER_COLOR, text:'white', line: POWER_COLOR, style:'bars'}        
     }
     const getHeartrateConfig = () => {
         const ftpVal = activity?.user?.ftp??ftp
         if (!ftpVal) 
-            return { background:'red', text:'white', line:'red'}        
+            return { background:HEARTRATE_COLOR, text:'white', line:HEARTRATE_COLOR}        
         else 
             return { background:'white', text:'black', line: 'white'}        
     }
@@ -216,10 +251,12 @@ const ActivityGraphView  = ({activity,ftp,width,height,units}) => {
         return false
     
 
+    // short rides need more decimals, otherwise neighbouring ticks show the same value (0.0 0.0 0.1 ...)
     const xTicks = v => { 
-        if (units?.distance)
-            return v.toFixed(1)
-        return  (v/1000).toFixed(1) 
+        const value = units?.distance ? v : v/1000
+        // very short distances (e.g. a ride of a few hundred metres) need a third decimal
+        const digits = Math.abs(value)>0 && Math.abs(value)<0.1 ? 3 : 2
+        return new Intl.NumberFormat(undefined, { maximumFractionDigits: digits }).format(value)
     }
 
     return (
@@ -227,20 +264,20 @@ const ActivityGraphView  = ({activity,ftp,width,height,units}) => {
             <ErrorBoundary hideOnError debug>
             <Column className="column activityGraph">
                 <Row position='relative' className="row activityGraphLabels">
-                    {power?.length ? <Column background={pc.background} color={pc.text} margin='0 1vw 0 0'>Power</Column>:null}
-                    {heartrate?.length ? <Column background={hc.background} color={hc.text} margin='0 1vw 0 0'>Heartrate</Column>:null}
+                    <Legend>
+                        {power?.length ? <LegendItem $color={pc.line}>Power</LegendItem>:null}
+                        {heartrate?.length ? <LegendItem $color={hc.line}>Heartrate</LegendItem>:null}
+                    </Legend>
                 </Row>
 
                 <ContainerArea position='relative' ref= {refHighlight}>
                     
                     <div className='graph1' style={{  zIndex:998, top:0, position:'absolute' }}>
                         <XYPlot margin={{right: 40}} width={width} height={height}  >
-                            {width && <HorizontalGridLines direction='horizontal' attr='y' />}
-                            {width && <VerticalGridLines direction='vertical' attr='x' />}
-                            {width && <XAxis attr='x' tickFormat={ xTicks } style={{text: {stroke:'white', fontSize:'1.5vh'}}} />}
-                            {width && <YAxis attr='y' orientation='left' tickFormat={ v => v? `${v.toFixed(0)}`:undefined } style={{
-                                text: {stroke:pc.line, fontSize:'1.5vh'}
-                            }}/>}
+                            {width && <HorizontalGridLines direction='horizontal' attr='y' style={gridStyle} />}
+                            {width && <VerticalGridLines direction='vertical' attr='x' style={gridStyle} />}
+                            {width && <XAxis attr='x' tickTotal={8} tickFormat={ xTicks } style={axisText('rgba(255,255,255,0.7)')} />}
+                            {width && <YAxis attr='y' orientation='left' tickFormat={ v => v? `${v.toFixed(0)}`:undefined } style={axisText(pc.line)}/>}
 
                             {width && <PositionMarker 
                                 values={crosshairValues} 
@@ -260,9 +297,7 @@ const ActivityGraphView  = ({activity,ftp,width,height,units}) => {
 
                     {(heartrate && heartrate.length>0) && <div className='graph2' style={{ zIndex:999, top:2, position:'absolute' }}>
                         <XYPlot margin={{right: 40}} width={width} height={height} >
-                            {width &&  <YAxis attr='y' orientation='right' tickFormat={ v => v? `${v.toFixed(0)}`:undefined }  style={{
-                                text: {stroke:hc.line, fontSize:'1.5vh'}                                
-                            }}/>}
+                            {width &&  <YAxis attr='y' orientation='right' tickFormat={ v => v? `${v.toFixed(0)}`:undefined }  style={axisText(hc.line)}/>}
                             <LineSeries color={hc.line} data={heartrate} onNearestX={onNearestX}     />
                         </XYPlot>
                     </div>}

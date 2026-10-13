@@ -14,7 +14,8 @@ const List = styled.ol`
     height: 6.66vh; // 11/12 of 80%;
     padding:0;
     margin:0;
-    border-bottom: 1px solid;
+    padding-left: 0.6vw;
+    border-bottom: 1px solid rgba(255,255,255,0.10);
 `
 
 const Content = styled.div`

@@ -9,7 +9,13 @@ import { EventLogger } from 'gd-eventlog';
 
 const Title = styled.h2`
     text-align: left;
-    font-size: 2vh;
+    font-size: 2.2vh;
+    font-weight: 650;
+    line-height: 1.3;
+    margin: 0 0 1vh 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
 `
 
 const Infoline = styled.div`
