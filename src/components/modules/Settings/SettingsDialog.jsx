@@ -7,6 +7,7 @@ import { AppsSettings } from "./Apps"
 import { SupportArea } from "./Support"
 import { Button, ButtonBar } from "../../atoms"
 import { GearSettings } from "./Gear"
+import { RouteServersSettings } from "./Servers"
 
 export const SettingsDialog = ({onOK})=> {
 
@@ -49,6 +50,7 @@ export const SettingsDialogView = ({onOK, onCoachesChanged, onSettingsChanged, n
                 {showGear ?  <GearSettings label='Gear' />:null}                
                 <RideSettings label='Ride' /> 
                 <AppsSettings label='Apps'   />
+                <RouteServersSettings label='Servers' />
                 <SupportArea label='Support' />                 
             </Tabs>
 
