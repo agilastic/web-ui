@@ -17,8 +17,11 @@ const ImageBackground = styled.div.withConfig({
     background: linear-gradient(to bottom,rgba(128,128,255,1) 0%,rgba(245,245,245,1) 100%);
     background-image: url(${props => props.url ? props.url:"images/background.jpg"});
     background-size: cover;
-    filter: blur(8px);
-    -webkit-filter: blur(8px);
+    /* light blur only - the photo stays recognisable; slightly darkened so text on top stays readable,
+       scaled up a little so the blurred edges don't show */
+    filter: blur(2px) brightness(0.85);
+    -webkit-filter: blur(2px) brightness(0.85);
+    transform: scale(1.02);
 `;
 
 
