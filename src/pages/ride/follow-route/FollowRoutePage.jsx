@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { useUserSettings } from "incyclist-services";
 
-import { DynamicRideDashboard, MapOverlay, NearbyRiders, StartRideOverlay, TotalElevationOverlay, UpcomingElevationOverlay,
+import { BikeComputer, DynamicRideDashboard, MapOverlay, NearbyRiders, StartRideOverlay, TotalElevationOverlay, UpcomingElevationOverlay,
          SideViewOverlay, RouteOptions,RidePageItems  } from "../../../components/modules/Ride";
 import { DynamicWorkoutDashboard } from "../../../components/modules/workout/dashboard/wrapper";
 import { Center, ErrorBoundary, Loader } from "../../../components/atoms";
@@ -22,7 +22,7 @@ export const FollowRouteRidePage = ( { workout, activity, route, state,initializ
                                        position, markers, hideAll,rideView,realityFactor,startPos, endPos,
                                        displayObserver, onDisplayEvent,displayPosition, sideViews, svInitAllowed, rideViewNotice, svCoverageNotice, svHasCoverage,
                                        map,upcomingElevation,totalElevation,dbColumns,xScale, yScale,
-                                       prevRides,nearbyRides, showShiftingButtons, showDashboard, showWorkout,
+                                       prevRides,nearbyRides, showShiftingButtons, showDashboard, showWorkout, rideLayout, rideScreen,
                                        screenshotRequested, onScreenshot, onSettings,
                                        onStartRetry, onStartIgnore, onStartCancel, onStartWithMap, onToggleCyclingMode
                                     } ) => {
@@ -30,6 +30,8 @@ export const FollowRouteRidePage = ( { workout, activity, route, state,initializ
 
     // time, distance, speed, power, slope, heartrate, cadence
     const dbWidth = 50/7*(dbColumns??7)
+    // bike computer: small unit at the bottom centre with several screens (b) - the top of the screen stays free
+    const computer = (rideScreen ?? (rideLayout==='classic' ? 'classic' : 'data'))!=='classic'
     const isStarting = state==='Starting' || state==='Idle'
     const lapMode = route?.description?.isLoop
     const slopeRange = 2000
@@ -49,9 +51,9 @@ export const FollowRouteRidePage = ( { workout, activity, route, state,initializ
     const opacity = rideView==='map' ? 1 : 0.6
 
     const egPos = {
+        left: 0,
         // ends at the bottom edge - the page itself starts below the free area at the top (camera notch)
         top:'calc(88vh - var(--safe-area-top, 0px))',
-        left:0,
         height:'12vh',
     }
 
@@ -107,29 +109,35 @@ export const FollowRouteRidePage = ( { workout, activity, route, state,initializ
                             <GpxRideView visible={true} isMain={true} position={displayPosition} route={route} rideView={rideView} svInitAllowed={svInitAllowed} onEvent={onDisplayEvent} observer={displayObserver} />
 
                             {/* dashboards and controls */}
-                            <DynamicRideDashboard visible={showDashboard} scheme='light' fold='top-right' foldId='gpx-ride-dashboard' opacity={1.0}  height={'10vh'} top={0} left={`${(100-dbWidth)/2}vw`} width={`${dbWidth}vw`}  />
-                            <ShiftingControl visible={showShiftingButtons&& !screenshotRequested} background='none' top={'calc(10vh + 10px);'}  justify='center' onToggleMode={ onToggleCyclingMode} />
+                            <DynamicRideDashboard visible={showDashboard && !computer} scheme='light' fold='top-right' foldId='gpx-ride-dashboard' opacity={1.0}  height={'10vh'} top={0} left={`${(100-dbWidth)/2}vw`} width={`${dbWidth}vw`}  />
+                            <ShiftingControl visible={showShiftingButtons&& !screenshotRequested} background='none' top={computer ? '10px' : 'calc(10vh + 10px)'}  justify='center' onToggleMode={ onToggleCyclingMode} />
 
-                            <DynamicWorkoutDashboard visible={showWorkout} showSlope={false} background='none' scheme='light' opacity={1.0}  height={'10vh'} top={'10vh'} left={`${(100-dbWidth)/2}vw`} width={`${dbWidth}vw`} />                            
-                            <WorkoutControl visible={showWorkout&& !screenshotRequested} background='none' top={'calc(20vh + 10px);'} left={`${(100-dbWidth)/2}vw`} onToggleMode={ onToggleCyclingMode}/>
-                            <RouteOptions visible={!isStarting&& !screenshotRequested} top='65vh' left='26vw' height='35vh' width='48vw'
+                            <DynamicWorkoutDashboard visible={showWorkout} showSlope={false} background='none' scheme='light' opacity={1.0}  height={'10vh'} top={computer ? 0 : '10vh'} left={`${(100-dbWidth)/2}vw`} width={`${dbWidth}vw`} />                            
+                            <WorkoutControl visible={showWorkout&& !screenshotRequested} background='none' top={computer ? 'calc(10vh + 10px)' : 'calc(20vh + 10px)'} left={`${(100-dbWidth)/2}vw`} onToggleMode={ onToggleCyclingMode}/>
+                            <RouteOptions visible={!isStarting&& !screenshotRequested} top={computer ? '28vh' : '65vh'} left='26vw' height='35vh' width='48vw'
                                 transparent={true} pinned={false} settings={true} screenshot={true}
                                 onScreenshot={onScreenshot} onSettings={onSettings}/>           
 
                             {/* overlays */}
-                            {showMap ? <MapOverlay foldId='map' fold={'top-right'}  opacity={1.0} markers = {markers} preview={false} freeRide={false} 
+                            <BikeComputer visible={!!map?.show && showDashboard && computer && !screenshotRequested} transparent={true} opacity={1}
+                                top={'calc(82.5vh - var(--safe-area-top, 0px))'} left={'35vw'} width={'30vw'} height={'17.5vh'}
+                                screen={rideScreen} map={map} upcomingElevation={upcomingElevation} showMap={rideView!=='map'}
+                                route={route} position={position} markers={markers} startPos={startPos} endPos={endPos}
+                                lapMode={lapMode} realityFactor={realityFactor} xScale={xScale} yScale={yScale} slopeRange={slopeRange} />
+                            {showMap && !computer ? <MapOverlay foldId='map' fold={'top-right'}  opacity={1.0} markers = {markers} preview={false} freeRide={false} 
                                 minimized = {map?.minimized}
+                                view = {map?.view} zoom = {map?.zoom} headingUp = {map?.headingUp} bearing = {map?.bearing}
                                 top = {0} left={0} height={'30vh'} width={'20vw'}
                                 routeData={route.details} position={position} startPos={startPos} endPos={endPos} 
                                 /> : null}
-                            {upcomingElevation?.show ? <UpcomingElevationOverlay {...sideViewProps} foldId={'slope'} top={0} left={'85vw'} width={'15vw'} height={'20vh'}
+                            {upcomingElevation?.show && !computer ? <UpcomingElevationOverlay {...sideViewProps} foldId={'slope'} top={0} left={'85vw'} width={'15vw'} height={'20vh'}
                                 minimized={upcomingElevation?.minimized} 
                                 routeData={route.details} lapMode={lapMode} pctReality={realityFactor}
                                 showXAxis={true} showYAxis={true} xScale={xScale} yScale={yScale} line={{color:'white'}} range={slopeRange}
                                 markers = { []}
                                 position={position} /> : null}
 
-                            {totalElevation?.show ? <TotalElevationOverlay {...sideViewProps} foldId={'elevation'} transparent={true} opacity={rideView==='map' ? 1 : opacity}   
+                            {totalElevation?.show && !computer ? <TotalElevationOverlay {...sideViewProps} foldId={'elevation'} transparent={true} opacity={rideView==='map' ? 1 : opacity}   
                                 top={egPos.top} left={egPos.left} width={egPos.width} height={egPos.height} 
                                 minimized={totalElevation?.minimized} 
                                 addPosition={true}
