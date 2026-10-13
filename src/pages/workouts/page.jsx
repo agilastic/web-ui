@@ -1,5 +1,5 @@
 import React, { useEffect, useState,useRef,useCallback } from "react"
-import { useDevicePairing, useWorkoutList,useRouteList } from "incyclist-services"
+import { useDevicePairing, useWorkoutList,useRouteList, useWorkoutInbox } from "incyclist-services"
 import { useNavigate } from "react-router";
 import { EventLogger } from "gd-eventlog"
 import styled from "styled-components"
@@ -294,6 +294,9 @@ export const WorkoutsPage =  () => {
 
     },[])
 
+    const inbox = useWorkoutInbox()
+    const autoImport = inbox.isSupported() && inbox.isEnabled()
+
     const closeOverlay = ()=> {
 
         logger.logEvent( {message:'Overlay closed', overlay:'Create Workout Info',markAsSeen } )
@@ -333,7 +336,10 @@ export const WorkoutsPage =  () => {
                             <li> Click OK to open the ZwoFactory page </li>
                             <li> Within ZwoFactory, create or select a pre-defined workout</li>
                             <li> Within ZwoFactory, download the workout using the Download button </li>
-                            <li> Go back to ForkyCyclist and import the workout using the Import Card </li>
+                            {autoImport ?
+                                <li> Go back to ForkyCyclist - the workout is imported automatically </li> :
+                                <li> Go back to ForkyCyclist and import the workout using the Import Card </li>
+                            }
                         </List>
                         </Column>
 
