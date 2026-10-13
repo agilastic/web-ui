@@ -14,6 +14,7 @@ import {UploadCard} from '../../components/modules/workout/selection/UploadCard'
 import {WorkoutCard} from '../../components/modules/workout/selection/WorkoutCard'
 import { WorkoutCreateCard } from "../../components/modules/workout/selection/CreateCard"
 import { ScheduledWorkoutCard } from "../../components/modules/workout/selection/ScheduledWorkoutCard"
+import { WorkoutInboxBar } from "../../components/modules/workout/inbox"
 
 const UP = 'ArrowUp'
 const DOWN = 'ArrowDown'
@@ -36,6 +37,11 @@ const ContentArea = styled(Column)`
     padding-right: 40px;
     overflow-y: hidden;
    
+`
+
+const TitleRow = styled(Row)`
+    align-items: center;
+    width: 100%;
 `
 
 const CardView= styled(Row)`
@@ -320,7 +326,10 @@ export const WorkoutsScreen =  /*forwardRef(*/
                 <NavigationBar closePage={closePage} selected='workouts' />
 
                 <ContentArea width={'100%'} >
-                    <PageTitle>Workouts</PageTitle>   
+                    <TitleRow>
+                        <PageTitle>Workouts</PageTitle>
+                        <WorkoutInboxBar />
+                    </TitleRow>
 
                     <AppThemeProvider>                    
                         <ListContainer width='100%' height='100%' ref={refDiv}>

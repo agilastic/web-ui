@@ -7,6 +7,7 @@ import {AppLoadingPage,ActivitiesPage,RidePage, PairingPage,RouteListPage,ExitPa
 import { UpdateChecker } from './components/modules';
 import { MapsApiLoader,MessageBox,MonitorOnlineStatus,MainPage } from './components/molecules';
 import { NavigationBridge } from './components/modules';
+import { WorkoutInboxToast } from './components/modules/workout/inbox';
 import { ErrorBoundary } from './components/atoms';
 import { useInitAppTheme, usePlatformIntegration } from './hooks';
 import NativeUiService from './bindings/native-ui';
@@ -98,6 +99,7 @@ export const App = ()=> {
             <MonitorOnlineStatus loading={<AppLoadingPage/>}> 
                 <MapsApiLoader/>
                 <UpdateChecker/>
+                <WorkoutInboxToast/>
                 <MemoryRouter>
                     <NavigationBridge/>
                     <Routes>
