@@ -71,6 +71,33 @@ describe('Video audio', () => {
         expect(container.querySelector('video').muted).toBe(true)
     })
 
+    test('mutes the audio at extreme playback rates and unmutes it in the normal range', () => {
+        const observer = createObserver()
+        const { container } = render(<Video src="video:///local/route.mp4" observer={observer} muted={false} />)
+        const video = container.querySelector('video')
+
+        act(() => { observer.emit('rate-update', 1.2) })
+        expect(video.muted).toBe(false)
+
+        act(() => { observer.emit('rate-update', 2.5) })
+        expect(video.muted).toBe(true)
+
+        act(() => { observer.emit('rate-update', 1.0) })
+        expect(video.muted).toBe(false)
+
+        act(() => { observer.emit('rate-update', 0.3) })
+        expect(video.muted).toBe(true)
+    })
+
+    test('stays muted at normal rates when sound is switched off', () => {
+        const observer = createObserver()
+        const { container } = render(<Video src="video:///local/route.mp4" observer={observer} muted={true} />)
+
+        act(() => { observer.emit('rate-update', 1.0) })
+
+        expect(container.querySelector('video').muted).toBe(true)
+    })
+
     test('keeps the audio pitch when the playback rate changes', () => {
         const observer = createObserver()
         const { container } = render(<Video src="video:///local/route.mp4" observer={observer} muted={false} />)
