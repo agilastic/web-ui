@@ -19,7 +19,8 @@ const Container = styled.div`
     justify-content: center;
     align-items: center;
     text-align: center;
-    background:none;
+    background: rgba(5,8,14,0.45);
+    backdrop-filter: blur(2px);
 `
 
 const ModalDialog = styled.div`
@@ -36,22 +37,27 @@ const ModalDialog = styled.div`
     border: ${props => props.theme.dialog.border || 'rgb(0,0,0) 1px solid'};
     border-radius: ${props => props.theme.dialog?.borderRadius} ;
     
-    box-shadow: 5px 5px 15px 5px #000000;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+    overflow: hidden;
     background: ${props => props.theme.dialog.background};
     color: ${props => props.theme.dialog.text};
     ${props => scrollbarVars(props.$scrollbar)}
 `;
 
 export const TitleBar = styled.div`
-    text-align: center ;
-    text-transform: uppercase;
-    font-family: "Roboto", "Arial", sans-serif, bold;
-    font-size:  3vh;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
     width: 100%;
     height: 6.66vh;     // 1/12 of 80%
+    padding: 0 1.6vw;
+    text-align: left;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 2.5vh;
+    font-weight: 600;
     background-color: ${props => props.theme.title.background};
     color: ${props=>props.theme.title.text};
-    display: inline-table;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 `;
 
 const ContainerArea = styled.div`
@@ -60,14 +66,17 @@ const ContainerArea = styled.div`
     padding:0;
 `;
 
+// long titles stay on one line (the full title is shown as tooltip)
 const Text = styled.span`
     margin: 0;
-    position: relative;
-    top: 1.83vh;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 `;
 
 export function Title(props) {
-    return <TitleBar><Text>{props.title}</Text></TitleBar>
+    return <TitleBar><Text title={props.title}>{props.title}</Text></TitleBar>
 } 
 
 const ESC=27

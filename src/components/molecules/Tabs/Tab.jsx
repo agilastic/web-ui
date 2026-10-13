@@ -2,34 +2,37 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import { AppThemeProvider } from '../../../theme';
 
+// modern tabs: the active tab is marked with an accent underline (no filled block)
 const Active = styled.li`
-    background: ${props => props.theme?.navbar?.selected?.background||props.theme?.list?.selected?.background};
-    color: ${props => props.theme?.navbar?.selected?.text||props.theme?.list?.selected.text};
     display: inline-block;
     list-style: none;
     margin-bottom: 0px;
-    padding: 0vh 1vw;
+    padding: 0 1.2vw;
     font-size: 2.2vh;
+    font-weight: 600;
     height: 6.66vh; // 11/12 of 80%
     line-height: 6.66vh; // 11/12 of 80%
-    vertical-align:center;
+    color: ${props => props.theme?.title?.text ?? 'inherit'};
+    box-shadow: inset 0 -3px 0 ${props => props.theme?.button?.primary?.background ?? '#dd9933'};
+    cursor: default;
 `
 
 const Inactive = styled.li`
-    background: ${props => props.theme?.navbar?.normal?.background||props.theme?.list?.normal?.background};
-    color: ${props => props.theme?.navbar?.normal?.text||props.theme?.list?.normal?.text};
     display: inline-block;
     list-style: none;
     margin-bottom: 0px;
-    padding: 0 1vw;
+    padding: 0 1.2vw;
     font-size: 2.2vh;
     height: 6.66vh; // 11/12 of 80%
     line-height: 6.66vh; // 11/12 of 80%
-    vertical-align:center;
+    color: ${props => props.theme?.title?.text ?? 'inherit'};
+    opacity: 0.65;
+    cursor: pointer;
+    transition: opacity .15s ease, background .15s ease;
 
     &:hover {
-      background: ${props => props.theme?.navbar?.hover?.background||props.theme?.list?.hover?.background};
-      color: ${props => props.theme?.navbar?.hover?.text||props.theme?.list?.hover?.text};  
+      opacity: 1;
+      background: rgba(255,255,255,0.06);
     }
 `
 

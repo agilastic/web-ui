@@ -178,15 +178,16 @@ export const newUITheme = {
     },
     button : {
         hover: {
-            background: base.hover,
+            background: '#f0a030',      // brighter orange (logo accent) instead of the old green
             text: base.primaryButtonText
         },
         primary: {
             background: base.primaryButton,
             text: base.primaryButtonText
         },
+        // modern look: only the primary action is orange, the other buttons are subtle
         normal: {
-            background: base.normalButton,
+            background: 'rgba(255,255,255,0.12)',
             text: base.normalButtonText
         }, 
         disabled: {
@@ -194,7 +195,7 @@ export const newUITheme = {
             text: base.disabledButtonText
         }, 
         secondary: {
-            background: base.secondaryButton,
+            background: 'rgba(255,255,255,0.08)',
             text: base.secondaryButtonText
         } 
     },
@@ -218,14 +219,13 @@ export const newUITheme = {
     },
     dialog: {
         background1: 'rgb(33,33,33,0.975)',
-        background: 'linear-gradient(rgb(56,1,31,0.975),rgb(26,4,86,0.975))',
+        // slate blue, matching the app icon and the loading screen
+        background: 'linear-gradient(180deg, rgba(27,34,49,0.98), rgba(15,19,29,0.98))',
         background2: 'linear-gradient(#38011f,#180457)',
-        
-        
 
         text:'white',
-        border:'#C0C0C0 1px solid',
-        borderRadius: '1vh 1vw'
+        border:'1px solid rgba(255,255,255,0.10)',
+        borderRadius: '16px'
         
     },
     pageLists: {
