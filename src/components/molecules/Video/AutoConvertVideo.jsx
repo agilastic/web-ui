@@ -1,10 +1,22 @@
 import React, { useCallback, useEffect, useRef,useState } from 'react';
+import { isAudibleRate } from './audio';
 import styled from 'styled-components';
 import { Observer } from 'incyclist-services';
 import { EventLogger } from 'gd-eventlog';
 
 import { Autosize, ErrorBoundary, Loader } from '../../atoms';
 import { useUnmountEffect } from '../../../hooks';
+import { hasFeature } from '../../../utils/electron/integration';
+
+// fallback for desktop versions that don't report the MIME type of the stream (video only)
+export const DEFAULT_STREAM_MIME = 'video/mp4; codecs="avc1.4D0029"'
+
+// desktop versions with this capability can include audio in the streamed conversion and report the
+// MIME type (incl. audio codec) of the stream - older versions only stream video, so the video stays muted
+export const supportsConvertedAudio = () => {
+    try { return hasFeature('video.convert.audio') }
+    catch { return false }
+}
 
 export const VideoContainer = styled(Autosize)`
     width: ${props => props.width};
@@ -23,7 +35,7 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
                          onPlaybackUpdate, onLoaded, onLoadError, onPlaybackError, onStalled, onWaiting, onEnded,
                          } ) => {
 
-    const mime = 'video/mp4; codecs="avc1.4D0029"';
+    const refAudioSupported = useRef(supportsConvertedAudio())
     const refVideo = useRef(null)
     const [state,setState] = useState({mounted:false})
     const refInfo = useRef({
@@ -107,11 +119,18 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
     }
 
 
+    // audio is muted if requested (prop) or if the playback rate is outside of the audible range
+    const refAudibleRate = useRef(true)
+    const applyMuted = useCallback( ()=>{
+        const shouldMute = muted || !refAudioSupported.current || !refAudibleRate.current
+        if (refVideo.current && refVideo.current.muted!==shouldMute)
+            refVideo.current.muted = shouldMute
+    },[muted])
+
     // keep the element's muted state in sync with the prop, so sound can be switched on/off during a ride
     useEffect( ()=>{
-        if (refVideo.current && refVideo.current.muted!==muted)
-            refVideo.current.muted = muted
-    },[muted])
+        applyMuted()
+    },[applyMuted])
 
     const setRate = useCallback( ( rate )=> {       
         if (!refVideo.current)
@@ -128,6 +147,8 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
             // playback speed follows the rider's speed - keep the audio at its natural pitch
             refVideo.current.preservesPitch = true
             refVideo.current.playbackRate = rate        
+            refAudibleRate.current = isAudibleRate(rate, refAudibleRate.current)
+            applyMuted()
             if (rate>0)
                 startPlay()
             else if (rate===0) 
@@ -138,7 +159,7 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
             logEvent({message:'failed to set rate', reason:err.message})
         }
 
-    },[startPlay])
+    },[startPlay, applyMuted])
 
 
     const setTime = useCallback( (time) => {
@@ -342,15 +363,32 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
 
     }
 
+    // the source buffer needs the MIME type of the stream (with or without audio), which is only known
+    // once the conversion has started - so it is created when the MediaSource is open AND the stream started
+    const initSourceBuffer = () => {
+        const info = refInfo.current
+        if (!info.mediaSourceOpened || !info.streamMime || info.buffer)
+            return
+
+        const mime = info.streamMime
+        if (!MediaSource.isTypeSupported(mime)) {
+            logEvent( {message:'video error', reason:'unsupported stream type', mime})
+            info.error = new Error('Conversion Error')
+            onError()
+            return
+        }
+
+        const buffer = info.buffer = info.mediaSource.addSourceBuffer(mime)
+        buffer.addEventListener( 'updateend',()=> {
+            getNextSegment()
+        })
+        getNextSegment()
+    }
+
     const initMediaSource = () => {
                 // init mediasource
         const video = refVideo.current;
         const mediaSource = new MediaSource();
-
-        if (!MediaSource.isTypeSupported(mime)) {
-            //TODO: handle error
-            return;
-        }
 
         video.src = URL.createObjectURL(mediaSource); 
 
@@ -360,14 +398,8 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
         });
 
         mediaSource.addEventListener('sourceopen', () => { 
-            const buffer = refInfo.current.buffer = mediaSource.addSourceBuffer(mime)
             refInfo.current.mediaSourceOpened = true
-            getNextSegment()
-
-            buffer.addEventListener( 'updateend',(...args)=> {
-                getNextSegment()
-            })
-
+            initSourceBuffer()
         })
 
         
@@ -405,13 +437,15 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
         refInfo.current.conversion = conversion
 
         conversion.getObserver()
-            .once('convert-start', ()=>{  
+            .once('convert-start', (startInfo)=>{  
                 refInfo.current.converting = true
                 refInfo.current.tsConvertStart = Date.now()
+                refInfo.current.streamMime = startInfo?.mime ?? DEFAULT_STREAM_MIME
+                initSourceBuffer()
             })
 
         initMediaSource()
-        conversion.convert()
+        conversion.convert( refAudioSupported.current ? {audio:true} : undefined )
 
 
     })
@@ -472,7 +506,7 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
                         onCanPlay={ onCanPlay }
                         onCanPlayThrough={ onCanPlay}
                         onStalled={onStalledHandler}
-                        muted={muted}                 
+                        muted={muted || !refAudioSupported.current}                 
                         controls={false}  
                         autoPlay={false}
                     />   :
@@ -487,7 +521,7 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
                         onCanPlay={ onCanPlay }
                         onCanPlayThrough={ onCanPlay}
                         onStalled={onStalledHandler}
-                        muted={muted}                 
+                        muted={muted || !refAudioSupported.current}                 
                         controls={false}  
                         autoPlay={false}
                     />
