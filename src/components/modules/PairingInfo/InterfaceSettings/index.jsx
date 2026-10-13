@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { Button,ButtonBar, CheckBox, Radio } from '../../../atoms';
+import { Button,ButtonBar, CheckBox, EditText, Radio } from '../../../atoms';
 import { Dialog } from '../../../molecules';
 import styled from 'styled-components';
 import { Header } from '../../../molecules/Styling';
@@ -69,7 +69,7 @@ export default class InterfaceSettings extends PureComponent {
         else 
             protocol = props.protocol
 
-        this.state = {enabled,protocol}       
+        this.state = {enabled,protocol,host:props.host??''}       
         
     }
 
@@ -87,9 +87,20 @@ export default class InterfaceSettings extends PureComponent {
         }
     }
 
+    onHostChanged(host) {
+        this.setState( {host})
+    }
+
     onOK() {
-        if (this.props.onOK)
-            this.props.onOK(this.state)
+        if (!this.props.onOK)
+            return
+
+        const {enabled,protocol,host} = this.state
+        const settings = {enabled,protocol}
+        // tcpip: a fixed host avoids scanning the local network; empty = scan
+        if (this.props.name==='tcpip')
+            settings.host = host.trim()
+        this.props.onOK(settings)
     }
 
  
@@ -100,7 +111,7 @@ export default class InterfaceSettings extends PureComponent {
         if (!texts)
             return null
 
-        const {enabled,protocol} = this.state
+        const {enabled,protocol,host} = this.state
         const {protocols} = this.props;
  
         return (
@@ -124,6 +135,19 @@ export default class InterfaceSettings extends PureComponent {
                                 <p>This network access is required to scan for devices in the local network<br/>You can limit this access to local network only.</p>
                             </WarningMessage> 
                             : null}
+
+                        { enabled && name==='tcpip' && 
+                            <div>
+                                <br></br>
+                                <Header>Device</Header>
+                                <EditText className='host' label='IP Address' labelPosition='before' labelWidth='12ch'
+                                    value={host} onChange={(value)=>this.onHostChanged(value)} />
+                                <WarningMessage>
+                                    <p>Enter the IP address of the device (e.g. 192.168.1.50).<br/>
+                                    Leave empty to search the local network for the device (port {this.props.port??51955}).</p>
+                                </WarningMessage>
+                            </div>
+                        }
 
                         { ( enabled && protocols && protocols.length>1) && 
                             <div>

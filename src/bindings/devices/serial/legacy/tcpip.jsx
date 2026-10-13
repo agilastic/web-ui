@@ -1,4 +1,5 @@
 import { EventLogger } from 'gd-eventlog';
+import { useUserSettings } from 'incyclist-services';
 import { hasFeature,api } from '../../../../utils/electron';
 
 //import { BindingPortInterface, OpenOptions, PortStatus, PortInfo, SetOptions, UpdateOptions, BindingInterface } from "@serialport/bindings-interface";
@@ -7,6 +8,35 @@ import { hasFeature,api } from '../../../../utils/electron';
 
 let _logger
 let _net
+
+// the device scan calls list() repeatedly (about once per second) while nothing is found - a subnet
+// scan probes every address of the local network, so its result is reused for this period
+export const SCAN_CACHE_MS = 60000
+let _lastScan // { port, ts, hosts }
+
+export const resetScanCache = () => { _lastScan = undefined }
+
+// fixed host (IP address) configured in the TCP/IP interface settings
+export const getConfiguredHost = () => {
+    try {
+        const interfaces = useUserSettings().get('interfaces',[]) ?? []
+        const host = interfaces.find( i=>i.name==='tcpip')?.host
+        return (typeof host === 'string' && host.trim().length>0) ? host.trim() : undefined
+    }
+    catch {
+        return undefined
+    }
+}
+
+const scanHosts = async (port) => {
+    if (_lastScan?.port===port && Date.now()-_lastScan.ts < SCAN_CACHE_MS)
+        return _lastScan.hosts
+
+    logEvent({message:'scanning local network', port})
+    const hosts = await api.network.scan(port) ?? []
+    _lastScan = { port, ts:Date.now(), hosts }
+    return hosts
+}
 
 
 //export type TCPBindingInterface = BindingInterface<TCPPortBinding,TCPOpenOptions>
@@ -47,13 +77,16 @@ export const TCPLegacyBinding = {
      */
     async list( port, excludeList) {
 
-        if (!port || !hasFeature('network.scan'))
+        if (!port)
             return []
-        
-        try {
 
-            
-            let hosts = await api.network.scan(51955, excludeList)
+        try {
+            const configuredHost = getConfiguredHost()
+            if (!configuredHost && !hasFeature('network.scan'))
+                return []
+
+            // a configured host is used directly - the local network is not scanned
+            let hosts = configuredHost ? [configuredHost] : await scanHosts(port)
 
             if(excludeList && excludeList.length>0)
                 hosts = hosts.filter( host => !excludeList.includes(host)&&!excludeList.includes(`${host}:${port}`))
