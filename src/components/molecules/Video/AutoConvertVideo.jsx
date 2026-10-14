@@ -1,22 +1,13 @@
 import React, { useCallback, useEffect, useRef,useState } from 'react';
-import { isAudibleRate } from './audio';
 import styled from 'styled-components';
 import { Observer } from 'incyclist-services';
 import { EventLogger } from 'gd-eventlog';
 
 import { Autosize, ErrorBoundary, Loader } from '../../atoms';
 import { useUnmountEffect } from '../../../hooks';
-import { hasFeature } from '../../../utils/electron/integration';
 
 // fallback for desktop versions that don't report the MIME type of the stream (video only)
 export const DEFAULT_STREAM_MIME = 'video/mp4; codecs="avc1.4D0029"'
-
-// desktop versions with this capability can include audio in the streamed conversion and report the
-// MIME type (incl. audio codec) of the stream - older versions only stream video, so the video stays muted
-export const supportsConvertedAudio = () => {
-    try { return hasFeature('video.convert.audio') }
-    catch { return false }
-}
 
 export const VideoContainer = styled(Autosize)`
     width: ${props => props.width};
@@ -35,7 +26,6 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
                          onPlaybackUpdate, onLoaded, onLoadError, onPlaybackError, onStalled, onWaiting, onEnded,
                          } ) => {
 
-    const refAudioSupported = useRef(supportsConvertedAudio())
     const refVideo = useRef(null)
     const [state,setState] = useState({mounted:false})
     const refInfo = useRef({
@@ -119,10 +109,9 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
     }
 
 
-    // audio is muted if requested (prop) or if the playback rate is outside of the audible range
-    const refAudibleRate = useRef(true)
+    // muted is decided by services (sound setting, playback rate) - the element just follows the prop
     const applyMuted = useCallback( ()=>{
-        const shouldMute = muted || !refAudioSupported.current || !refAudibleRate.current
+        const shouldMute = muted
         if (refVideo.current && refVideo.current.muted!==shouldMute)
             refVideo.current.muted = shouldMute
     },[muted])
@@ -147,8 +136,6 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
             // playback speed follows the rider's speed - keep the audio at its natural pitch
             refVideo.current.preservesPitch = true
             refVideo.current.playbackRate = rate        
-            refAudibleRate.current = isAudibleRate(rate, refAudibleRate.current)
-            applyMuted()
             if (rate>0)
                 startPlay()
             else if (rate===0) 
@@ -159,7 +146,7 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
             logEvent({message:'failed to set rate', reason:err.message})
         }
 
-    },[startPlay, applyMuted])
+    },[startPlay])
 
 
     const setTime = useCallback( (time) => {
@@ -445,7 +432,7 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
             })
 
         initMediaSource()
-        conversion.convert( refAudioSupported.current ? {audio:true} : undefined )
+        conversion.convert()
 
 
     })
@@ -506,7 +493,7 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
                         onCanPlay={ onCanPlay }
                         onCanPlayThrough={ onCanPlay}
                         onStalled={onStalledHandler}
-                        muted={muted || !refAudioSupported.current}                 
+                        muted={muted}                 
                         controls={false}  
                         autoPlay={false}
                     />   :
@@ -521,7 +508,7 @@ export const AutoConvertVideo = ( { src, startTime, observer, width, height,mute
                         onCanPlay={ onCanPlay }
                         onCanPlayThrough={ onCanPlay}
                         onStalled={onStalledHandler}
-                        muted={muted || !refAudioSupported.current}                 
+                        muted={muted}                 
                         controls={false}  
                         autoPlay={false}
                     />
